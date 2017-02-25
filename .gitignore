@@ -1,3 +1,4 @@
 .idea/*
 graph-databases-comparative-study.iml
 target/*
+driver-settings.properties
