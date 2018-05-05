@@ -2,3 +2,7 @@
 graph-databases-comparative-study.iml
 target/*
 driver-settings.properties
+
+# ignore unzipped datasets
+src/main/resources/datasets/facebook/facebook/
+src/main/resources/datasets/facebook/facebook_combined.txt/
