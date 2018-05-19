@@ -90,7 +90,6 @@ public class Neo4jBenchmark {
         } catch (IOException e) {
             System.out.println(String.format("Exception: %s", e.getMessage()));
         }
-
     }
 
     public boolean checkIfNodeExists(Integer nodeId) {

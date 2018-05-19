@@ -36,5 +36,10 @@
             <artifactId>neo4j-java-driver</artifactId>
             <version>1.5.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.orientechnologies</groupId>
+            <artifactId>orientdb-jdbc</artifactId>
+            <version>2.2.34</version>
+        </dependency>
     </dependencies>
 </project>
