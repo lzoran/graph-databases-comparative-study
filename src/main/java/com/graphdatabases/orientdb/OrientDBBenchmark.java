@@ -1,6 +1,7 @@
 package com.graphdatabases.orientdb;
 
 import com.graphdatabases.benchmark.BenchmarkTest;
+import com.graphdatabases.benchmark.annotation.Benchmark;
 import com.graphdatabases.benchmark.annotation.Setup;
 import com.graphdatabases.benchmark.annotation.TearDown;
 import com.graphdatabases.neo4j.Neo4jBenchmark;
@@ -13,6 +14,8 @@ import org.neo4j.driver.v1.AuthTokens;
 import org.neo4j.driver.v1.GraphDatabase;
 
 import java.io.*;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 
 public class OrientDBBenchmark {
@@ -155,6 +158,168 @@ public class OrientDBBenchmark {
         } finally {
             graph.shutdown();
         }
+    }
+
+    @Benchmark(iteration = 10)
+    public Vertex findNodeWithLeastIngoingEdges() {
+        Vertex vertex = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.command(new OCommandSQL("SELECT nodeId, IN().size() AS count FROM Person ORDER BY count ASC LIMIT 1")).execute();
+            if (iterable.iterator().hasNext()) {
+                vertex = iterable.iterator().next();
+            }
+        } finally {
+            graph.shutdown();
+        }
+
+        return vertex;
+    }
+
+    @Benchmark(iteration = 10)
+    public Vertex findNodeWithLeastOutgoingEdges() {
+        Vertex vertex = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.command(new OCommandSQL("SELECT nodeId, OUT().size() AS count FROM Person ORDER BY count ASC LIMIT 1")).execute();
+            if (iterable.iterator().hasNext()) {
+                vertex = iterable.iterator().next();
+            }
+        } finally {
+            graph.shutdown();
+        }
+
+        return vertex;
+    }
+
+    @Benchmark(iteration = 10)
+    public Vertex findNodeWithLeastIngoingAndOutgoingEdges() {
+        Vertex vertex = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.command(new OCommandSQL("SELECT nodeId, BOTH().size() AS count FROM Person ORDER BY count ASC LIMIT 1")).execute();
+            if (iterable.iterator().hasNext()) {
+                vertex = iterable.iterator().next();
+            }
+        } finally {
+            graph.shutdown();
+        }
+
+        return vertex;
+    }
+
+    @Benchmark(iteration = 10)
+    public Vertex findNodeWithMostIngoingEdges() {
+        Vertex vertex = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.command(new OCommandSQL("SELECT nodeId, IN().size() AS count FROM Person ORDER BY count DESC LIMIT 1")).execute();
+            if (iterable.iterator().hasNext()) {
+                vertex = iterable.iterator().next();
+            }
+        } finally {
+            graph.shutdown();
+        }
+
+        return vertex;
+    }
+
+    @Benchmark(iteration = 10)
+    public Vertex findNodeWithMostOutgoingEdges() {
+        Vertex vertex = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.command(new OCommandSQL("SELECT nodeId, OUT().size() AS count FROM Person ORDER BY count DESC LIMIT 1")).execute();
+            if (iterable.iterator().hasNext()) {
+                vertex = iterable.iterator().next();
+            }
+        } finally {
+            graph.shutdown();
+        }
+
+        return vertex;
+    }
+
+    @Benchmark(iteration = 10)
+    public Vertex findNodeWithMostIngoingAndOutgoingEdges() {
+        Vertex vertex = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.command(new OCommandSQL("SELECT nodeId, BOTH().size() AS count FROM Person ORDER BY count DESC LIMIT 1")).execute();
+            if (iterable.iterator().hasNext()) {
+                vertex = iterable.iterator().next();
+            }
+        } finally {
+            graph.shutdown();
+        }
+
+        return vertex;
+    }
+
+    @Benchmark(iteration = 10)
+    public Iterator<Vertex> findFriendsOfLeastConnectedNode() {
+        Iterator<Vertex> iterator = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.command(new OCommandSQL("SELECT BOTH(\"Friend\") FROM Person WHERE nodeId = 891")).execute();
+            iterator = iterable.iterator();
+        } finally {
+            graph.shutdown();
+        }
+
+        return iterator;
+    }
+
+    @Benchmark(iteration = 10)
+    public Iterator<Vertex> findFriendsOfAFriendsOfLeastConnectedNode() {
+        Iterator<Vertex> iterator = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.command(new OCommandSQL("SELECT BOTH(\"Friend\").BOTH(\"Friend\") FROM Person WHERE nodeId = 891")).execute();
+            iterator = iterable.iterator();
+        } finally {
+            graph.shutdown();
+        }
+
+        return iterator;
+    }
+
+    @Benchmark(iteration = 10)
+    public Iterator<Vertex> findFriendsOfMostConnectedNode() {
+        Iterator<Vertex> iterator = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.command(new OCommandSQL("SELECT BOTH(\"Friend\") FROM Person WHERE nodeId = 107")).execute();
+            iterator = iterable.iterator();
+        } finally {
+            graph.shutdown();
+        }
+
+        return iterator;
+    }
+
+    @Benchmark(iteration = 10)
+    public Iterator<Vertex> findFriendsOfFriendsOfMostConnectedNode() {
+        Iterator<Vertex> iterator = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.command(new OCommandSQL("SELECT BOTH(\"Friend\").BOTH(\"Friend\") FROM Person WHERE nodeId = 107")).execute();
+            iterator = iterable.iterator();
+        } finally {
+            graph.shutdown();
+        }
+
+        return iterator;
     }
 
     @TearDown
