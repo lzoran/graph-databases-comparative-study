@@ -19,13 +19,13 @@ public class Neo4jBenchmark {
         System.out.println("Initializing database driver.");
         initializeDriver();
 
-        System.out.println("Cleaning database - removing nodes and relationships between them.");
+        System.out.println("Cleaning database.");
         clean();
 
         System.out.println("Creating index on property nodeId.");
         createIndexOnProperty("nodeId");
 
-        System.out.println("Loading test data");
+        System.out.println("Setting initial data.");
         setupInitialData();
     }
 

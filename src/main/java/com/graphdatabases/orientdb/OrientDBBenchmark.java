@@ -25,19 +25,16 @@ public class OrientDBBenchmark {
     @Setup
     public void setup() {
 
-        System.out.println("Initializing OrientDB database driver.");
+        System.out.println("Initializing database driver.");
         initializeDriver();
 
-        System.out.println("Cleaning database - removing nodes and relationships between them.");
+        System.out.println("Cleaning database.");
         clean();
 
-        System.out.println("Initializing classes");
+        System.out.println("Initializing classes.");
         initializeClasses();
 
-        System.out.println("Creating index on property nodeId.");
-        createIndexOnProperty("Person", "nodeId");
-
-        System.out.println("Loading test data");
+        System.out.println("Setting initial data.");
         setupInitialData();
     }
 
@@ -66,20 +63,14 @@ public class OrientDBBenchmark {
         graphNoTx.getRawGraph().command(new OCommandSQL("DROP CLASS Person IF EXISTS UNSAFE")).execute();
     }
 
-    private void initializeClasses() {
-        createClass("Person", "V");
-        createClass("Friend", "E");
-    }
-
-    private void createClass(String className, String superClassName){
+    private void initializeClasses(){
         OrientGraphNoTx graphNoTx = factory.getNoTx();
-        graphNoTx.getRawGraph().command(new OCommandSQL(String.format("CREATE CLASS %s IF NOT EXISTS EXTENDS %s", className, superClassName))).execute();
-    }
 
-    private void createIndexOnProperty(String className, String propertyValue) {
-        OrientGraphNoTx graphNoTx = factory.getNoTx();
+        graphNoTx.getRawGraph().command(new OCommandSQL("CREATE CLASS Person IF NOT EXISTS EXTENDS V")).execute();
         graphNoTx.getRawGraph().command(new OCommandSQL("CREATE PROPERTY Person.nodeId IF NOT EXISTS INTEGER")).execute();
-        graphNoTx.getRawGraph().command(new OCommandSQL(String.format("CREATE INDEX %s.%s ON %s (%s) NOTUNIQUE", className, propertyValue, className, propertyValue))).execute();
+        graphNoTx.getRawGraph().command(new OCommandSQL("CREATE INDEX Person.nodeId ON Person (nodeId) NOTUNIQUE")).execute();
+
+        graphNoTx.getRawGraph().command(new OCommandSQL("CREATE CLASS Friend IF NOT EXISTS EXTENDS E")).execute();
     }
 
     private void setupInitialData() {
