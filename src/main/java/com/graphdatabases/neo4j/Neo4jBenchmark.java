@@ -124,11 +124,6 @@ public class Neo4jBenchmark {
         return result;
     }
 
-    @TearDown
-    public void closeConnection() {
-        driver.close();
-    }
-
     @Benchmark(iteration = 10)
     public StatementResult findNodeWithLeastIngoingEdges() {
         Session session = driver.session();
@@ -192,7 +187,7 @@ public class Neo4jBenchmark {
     @Benchmark(iteration = 10)
     public StatementResult findFriendsOfLeastConnectedNode() {
         Session session = driver.session();
-        String statement = "MATCH (p:Person)-[r:FRIEND]->(friend:Person) WHERE p.nodeId = 891 RETURN p, r, friend";
+        String statement = "MATCH (p:Person)-[r:FRIEND]->(friend:Person) WHERE p.nodeId = 891 RETURN friend";
         StatementResult result = session.run(statement);
         session.close();
 
@@ -202,7 +197,7 @@ public class Neo4jBenchmark {
     @Benchmark(iteration = 10)
     public StatementResult findFriendsOfAFriendsOfLeastConnectedNode() {
         Session session = driver.session();
-        String statement = "MATCH (p:Person)-[:FRIEND]->(friend:Person)-[:FRIEND]->(foaf:Person) WHERE p.nodeId = 891 AND friend <> foaf RETURN foaf";
+        String statement = "MATCH (p:Person)-[:FRIEND]->(friend:Person)-[:FRIEND]->(foaf:Person) WHERE p.nodeId = 891 RETURN foaf";
         StatementResult result = session.run(statement);
         session.close();
 
@@ -212,7 +207,7 @@ public class Neo4jBenchmark {
     @Benchmark(iteration = 10)
     public StatementResult findFriendsOfMostConnectedNode() {
         Session session = driver.session();
-        String statement = "MATCH (p:Person)-[r:FRIEND]->(friend:Person) WHERE p.nodeId = 107 RETURN p, r, friend";
+        String statement = "MATCH (p:Person)-[r:FRIEND]->(friend:Person) WHERE p.nodeId = 107 RETURN friend";
         StatementResult result = session.run(statement);
         session.close();
 
@@ -222,11 +217,116 @@ public class Neo4jBenchmark {
     @Benchmark(iteration = 10)
     public StatementResult findFriendsOfFriendsOfMostConnectedNode() {
         Session session = driver.session();
-        String statement = "MATCH (p:Person)-[:FRIEND]->(friend:Person)-[:FRIEND]->(foaf:Person) WHERE p.nodeId = 107 AND friend <> foaf RETURN foaf";
+        String statement = "MATCH (p:Person)-[:FRIEND]->(friend:Person)-[:FRIEND]->(foaf:Person) WHERE p.nodeId = 107 RETURN foaf";
         StatementResult result = session.run(statement);
         session.close();
 
         return result;
+    }
+
+    @Benchmark(iteration = 1, priority = 90)
+    public StatementResult createNewNodeWithNodeId10000() {
+        Session session = driver.session();
+        String statement = "CREATE (p:Person { nodeId: 10000}) RETURN p";
+        StatementResult result = session.run(statement);
+        session.close();
+
+        return result;
+    }
+
+    @Benchmark(iteration = 1, priority = 80)
+    public StatementResult createNewRelationshipBetweenMostConnectedNodeAndNodeWithNodeId10000() {
+        Session session = driver.session();
+        String statement = "MATCH (p1:Person), (p2:Person) WHERE p1.nodeId = 107 AND p2.nodeId = 10000 CREATE (p1)-[r1:FRIEND]->(p2) CREATE (p2)-[r2:FRIEND]->(p1) RETURN r1, r2";
+        StatementResult result = session.run(statement);
+        session.close();
+
+        return result;
+    }
+
+    @Benchmark(iteration = 10, priority = 70)
+    public StatementResult findNodeWithNodeId10000() {
+        Session session = driver.session();
+        String statement = "MATCH (p:Person { nodeId:10000 }) RETURN p";
+        StatementResult result = session.run(statement);
+        session.close();
+
+        return result;
+    }
+
+    @Benchmark(iteration = 10, priority = 60)
+    public StatementResult updateNodeWithNodeId10000() {
+        Session session = driver.session();
+        String statement = "MATCH (p:Person { nodeId:10000 }) SET p.firstName = 'John', p.lastName = 'Doe' RETURN p";
+        StatementResult result = session.run(statement);
+        session.close();
+
+        return result;
+    }
+
+    @Benchmark(iteration = 1, priority = 50)
+    public StatementResult deleteNodeWithNodeId10000() {
+        Session session = driver.session();
+        String statement = "MATCH (p:Person { nodeId:10000 }) DETACH DELETE p";
+        StatementResult result = session.run(statement);
+        session.close();
+
+        return result;
+    }
+
+    @Benchmark(iteration = 1, priority = 90)
+    public StatementResult createNewNodeWithNodeId20000() {
+        Session session = driver.session();
+        String statement = "CREATE (p:Person { nodeId: 20000}) RETURN p";
+        StatementResult result = session.run(statement);
+        session.close();
+
+        return result;
+    }
+
+    @Benchmark(iteration = 1, priority = 80)
+    public StatementResult createNewRelationshipBetweenLeastConnectedNodeAndNodeWithNodeId20000() {
+        Session session = driver.session();
+        String statement = "MATCH (p1:Person), (p2:Person) WHERE p1.nodeId = 891 AND p2.nodeId = 20000 CREATE (p1)-[r1:FRIEND]->(p2) CREATE (p2)-[r2:FRIEND]->(p1) RETURN r1, r2";
+        StatementResult result = session.run(statement);
+        session.close();
+
+        return result;
+    }
+
+    @Benchmark(iteration = 10, priority = 70)
+    public StatementResult findNodeWithNodeId20000() {
+        Session session = driver.session();
+        String statement = "MATCH (p:Person { nodeId:20000 }) RETURN p";
+        StatementResult result = session.run(statement);
+        session.close();
+
+        return result;
+    }
+
+    @Benchmark(iteration = 10, priority = 60)
+    public StatementResult updateNodeWithNodeId20000() {
+        Session session = driver.session();
+        String statement = "MATCH (p:Person { nodeId:20000 }) SET p.firstName = 'John', p.lastName = 'Doe' RETURN p";
+        StatementResult result = session.run(statement);
+        session.close();
+
+        return result;
+    }
+
+    @Benchmark(iteration = 1, priority = 50)
+    public StatementResult deleteNodeWithNodeId20000() {
+        Session session = driver.session();
+        String statement = "MATCH (p:Person { nodeId:20000 }) DETACH DELETE p";
+        StatementResult result = session.run(statement);
+        session.close();
+
+        return result;
+    }
+
+    @TearDown
+    public void closeConnection() {
+        driver.close();
     }
 
     public static void main(String[] args) {

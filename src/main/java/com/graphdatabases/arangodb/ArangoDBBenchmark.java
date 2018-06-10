@@ -244,6 +244,142 @@ public class ArangoDBBenchmark {
         return cursor.iterator();
     }
 
+    @Benchmark(iteration = 1, priority = 90)
+    public Person createNewNodeWithNodeId10000() {
+        Person person = new Person("10000");
+        arangoDB.db(DB_NAME).graph(GRAPH_NAME).vertexCollection(VERTEXT_COLLECTION_NAME).insertVertex(person);
+
+        return person;
+    }
+
+    @Benchmark(iteration = 1, priority = 80)
+    public boolean createNewRelationshipBetweenMostConnectedNodeAndNodeWithNodeId10000() {
+        boolean modified = false;
+
+        String query = "LET firstNodeId = (FOR p IN Persons FILTER p.nodeId == @firstNodeId RETURN p._id)[0] LET secondNodeId = (FOR p IN Persons FILTER p.nodeId == @secondNodeId RETURN p._id)[0] LET friends = [{ _from: firstNodeId, _to: secondNodeId }, { _from: secondNodeId, _to: firstNodeId }] FOR f IN friends INSERT f IN Friends LET inserted = NEW RETURN inserted";
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("firstNodeId", "107");
+        vars.put("secondNodeId", "10000");
+        ArangoCursor<Friend> cursor = arangoDB.db(DB_NAME).query(query, vars, null, Friend.class);
+
+        modified = cursor.hasNext();
+
+        return modified;
+    }
+
+    @Benchmark(iteration = 10, priority = 70)
+    public Person findNodeWithNodeId10000() {
+        Person person = null;
+
+        String query = "FOR p IN Persons FILTER p.`nodeId` == @nodeId RETURN p";
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("nodeId", "10000");
+        ArangoCursor<Person> cursor = arangoDB.db(DB_NAME).query(query, vars, null, Person.class);
+        if (cursor.hasNext()) {
+            person = cursor.next();
+        }
+
+        return person;
+    }
+
+    @Benchmark(iteration = 10, priority = 60)
+    public Person updateNodeWithNodeId10000() {
+        Person person = null;
+
+        String query = "FOR p IN Persons FILTER p.`nodeId` == @nodeId UPDATE p WITH {firstName: \"John\", lastName: \"Doe\"} IN Persons RETURN NEW";
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("nodeId", "10000");
+        ArangoCursor<Person> cursor = arangoDB.db(DB_NAME).query(query, vars, null, Person.class);
+        if (cursor.hasNext()) {
+            person = cursor.next();
+        }
+
+        return person;
+    }
+
+    @Benchmark(iteration = 1, priority = 50)
+    public Person deleteNodeWithNodeId10000() {
+        Person person = null;
+
+        String query = "FOR p IN Persons FILTER p.`nodeId` == @nodeId REMOVE p IN Persons RETURN OLD";
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("nodeId", "10000");
+        ArangoCursor<Person> cursor = arangoDB.db(DB_NAME).query(query, vars, null, Person.class);
+        if (cursor.hasNext()) {
+            person = cursor.next();
+        }
+
+        return person;
+    }
+
+    @Benchmark(iteration = 1, priority = 90)
+    public Person createNewNodeWithNodeId20000() {
+        Person person = new Person("20000");
+        arangoDB.db(DB_NAME).graph(GRAPH_NAME).vertexCollection(VERTEXT_COLLECTION_NAME).insertVertex(person);
+
+        return person;
+    }
+
+    @Benchmark(iteration = 1, priority = 80)
+    public boolean createNewRelationshipBetweenLeastConnectedNodeAndNodeWithNodeId20000() {
+        boolean modified = false;
+
+        String query = "LET firstNodeId = (FOR p IN Persons FILTER p.nodeId == @firstNodeId RETURN p._id)[0] LET secondNodeId = (FOR p IN Persons FILTER p.nodeId == @secondNodeId RETURN p._id)[0] LET friends = [{ _from: firstNodeId, _to: secondNodeId }, { _from: secondNodeId, _to: firstNodeId }] FOR f IN friends INSERT f IN Friends LET inserted = NEW RETURN inserted";
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("firstNodeId", "891");
+        vars.put("secondNodeId", "20000");
+        ArangoCursor<Friend> cursor = arangoDB.db(DB_NAME).query(query, vars, null, Friend.class);
+
+        modified = cursor.hasNext();
+
+        return modified;
+    }
+
+    @Benchmark(iteration = 10, priority = 70)
+    public Person findNodeWithNodeId20000() {
+        Person person = null;
+
+        String query = "FOR p IN Persons FILTER p.`nodeId` == @nodeId RETURN p";
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("nodeId", "20000");
+        ArangoCursor<Person> cursor = arangoDB.db(DB_NAME).query(query, vars, null, Person.class);
+        if (cursor.hasNext()) {
+            person = cursor.next();
+        }
+
+        return person;
+    }
+
+    @Benchmark(iteration = 10, priority = 60)
+    public Person updateNodeWithNodeId20000() {
+        Person person = null;
+
+        String query = "FOR p IN Persons FILTER p.`nodeId` == @nodeId UPDATE p WITH {firstName: \"John\", lastName: \"Doe\"} IN Persons RETURN NEW";
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("nodeId", "20000");
+        ArangoCursor<Person> cursor = arangoDB.db(DB_NAME).query(query, vars, null, Person.class);
+        if (cursor.hasNext()) {
+            person = cursor.next();
+        }
+
+        return person;
+    }
+
+    @Benchmark(iteration = 1, priority = 50)
+    public Person deleteNodeWithNodeId20000() {
+        Person person = null;
+
+        String query = "FOR p IN Persons FILTER p.`nodeId` == @nodeId REMOVE p IN Persons RETURN OLD";
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("nodeId", "20000");
+        ArangoCursor<Person> cursor = arangoDB.db(DB_NAME).query(query, vars, null, Person.class);
+        if (cursor.hasNext()) {
+            person = cursor.next();
+        }
+
+        return person;
+    }
+
     @TearDown
     public void tearDown() {
         arangoDB.shutdown();

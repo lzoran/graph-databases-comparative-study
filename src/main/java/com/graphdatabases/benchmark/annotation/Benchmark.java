@@ -10,4 +10,6 @@ import java.lang.annotation.Target;
 public @interface Benchmark {
 
     int iteration() default 1;
+
+    int priority() default 100;
 }

@@ -7,14 +7,13 @@ public class Person {
 
     @DocumentField(Type.ID)
     private String id;
-
     @DocumentField(Type.KEY)
     private String key;
-
     @DocumentField(Type.REV)
     private String revision;
-
     private String nodeId;
+    private String firstName;
+    private String lastName;
 
     public Person() {}
 
@@ -52,5 +51,21 @@ public class Person {
 
     public void setNodeId(String nodeId) {
         this.nodeId = nodeId;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 }

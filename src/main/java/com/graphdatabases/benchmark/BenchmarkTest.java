@@ -8,8 +8,7 @@ import com.graphdatabases.benchmark.exception.BenchmarkException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class BenchmarkTest {
@@ -26,20 +25,30 @@ public class BenchmarkTest {
         try {
             Object object = clazz.newInstance();
 
-            ArrayList<Method> setupMethods = new ArrayList();
-            ArrayList<Method> tearDownMethods = new ArrayList();
-            ArrayList<Method> benchmarkMethods = new ArrayList();
+            List<Method> setupMethods = new ArrayList<>();
+            List<Method> tearDownMethods = new ArrayList<>();
+            Map<Integer, List<Method>> benchmarkMethodsGroupedByPriority = new HashMap<>();
 
             Method[] methods = clazz.getMethods();
             for (Method method : methods) {
                 if (method.isAnnotationPresent(Setup.class)) {
                     setupMethods.add(method);
                 } else if (method.isAnnotationPresent(Benchmark.class)) {
-                    benchmarkMethods.add(method);
+                    Benchmark benchmark = method.getAnnotation(Benchmark.class);
+
+                    if (benchmarkMethodsGroupedByPriority.containsKey(benchmark.priority())) {
+                        benchmarkMethodsGroupedByPriority.get(benchmark.priority()).add(method);
+                    } else {
+                        List<Method> groupedMethods = new ArrayList<>();
+                        groupedMethods.add(method);
+
+                        benchmarkMethodsGroupedByPriority.put(benchmark.priority(), groupedMethods);
+                    }
                 } else if (method.isAnnotationPresent(TearDown.class)) {
                     tearDownMethods.add(method);
                 }
             }
+            List<Method> benchmarkMethods = sortBenchmarkMethodsByPriority(benchmarkMethodsGroupedByPriority);
 
             // setup
             validateSetupMethods(setupMethods);
@@ -52,7 +61,7 @@ public class BenchmarkTest {
             for (Method method : benchmarkMethods) {
                 Benchmark benchmark = method.getAnnotation(Benchmark.class);
 
-                List<Long> times = new ArrayList();
+                List<Long> times = new ArrayList<>();
                 for (int i = 0; i < benchmark.iteration(); i++) {
                     Stopwatch stopwatch = Stopwatch.createStarted();
                     method.invoke(object);
@@ -77,6 +86,18 @@ public class BenchmarkTest {
         }
 
         System.out.println(String.format("%s: Benchmark finished.", clazz.getName()));
+    }
+
+    private List<Method> sortBenchmarkMethodsByPriority(Map<Integer, List<Method>> map) {
+        List<Method> sortedMethods = new ArrayList<>();
+
+        List<Integer> keys = new ArrayList<>(map.keySet());
+        Collections.sort(keys, Collections.reverseOrder());
+        for (Integer key : keys) {
+            sortedMethods.addAll(map.get(key));
+        }
+
+        return sortedMethods;
     }
 
     private void validateSetupMethods(List<Method> methods) {

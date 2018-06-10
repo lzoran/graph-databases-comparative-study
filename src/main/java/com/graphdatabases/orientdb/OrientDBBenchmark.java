@@ -4,18 +4,15 @@ import com.graphdatabases.benchmark.BenchmarkTest;
 import com.graphdatabases.benchmark.annotation.Benchmark;
 import com.graphdatabases.benchmark.annotation.Setup;
 import com.graphdatabases.benchmark.annotation.TearDown;
-import com.graphdatabases.neo4j.Neo4jBenchmark;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
-import com.tinkerpop.blueprints.*;
+import com.tinkerpop.blueprints.Edge;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.orient.OrientGraph;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphFactory;
 import com.tinkerpop.blueprints.impls.orient.OrientGraphNoTx;
-import org.neo4j.driver.v1.AuthTokens;
-import org.neo4j.driver.v1.GraphDatabase;
 
 import java.io.*;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 
 public class OrientDBBenchmark {
@@ -53,7 +50,7 @@ public class OrientDBBenchmark {
         String username = properties.getProperty("username");
         String password = properties.getProperty("password");
 
-        factory = new OrientGraphFactory(uri, username, password).setupPool(1,10);
+        factory = new OrientGraphFactory(uri, username, password).setupPool(1, 10);
     }
 
     private void clean() {
@@ -63,7 +60,7 @@ public class OrientDBBenchmark {
         graphNoTx.getRawGraph().command(new OCommandSQL("DROP CLASS Person IF EXISTS UNSAFE")).execute();
     }
 
-    private void initializeClasses(){
+    private void initializeClasses() {
         OrientGraphNoTx graphNoTx = factory.getNoTx();
 
         graphNoTx.getRawGraph().command(new OCommandSQL("CREATE CLASS Person IF NOT EXISTS EXTENDS V")).execute();
@@ -311,6 +308,165 @@ public class OrientDBBenchmark {
         }
 
         return iterator;
+    }
+
+    @Benchmark(iteration = 1, priority = 90)
+    public Vertex createNewNodeWithNodeId10000() {
+        Vertex person = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            person = graph.addVertex("class:Person");
+            person.setProperty("nodeId", 10000);
+
+            graph.commit();
+        } finally {
+            graph.shutdown();
+        }
+
+        return person;
+    }
+
+    @Benchmark(iteration = 1, priority = 80)
+    public boolean createNewRelationshipBetweenMostConnectedNodeAndNodeWithNodeId10000() {
+        boolean modified = false;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Edge> resultOne = graph.command(new OCommandSQL("CREATE EDGE Friend FROM (SELECT FROM Person WHERE nodeId = 107) TO (SELECT FROM Person WHERE nodeId = 10000)")).execute();
+            Iterable<Edge> resultTwo = graph.command(new OCommandSQL("CREATE EDGE Friend FROM (SELECT FROM Person WHERE nodeId = 10000) TO (SELECT FROM Person WHERE nodeId = 107)")).execute();
+
+            modified = (resultOne.iterator().hasNext() && resultTwo.iterator().hasNext());
+        } finally {
+            graph.shutdown();
+        }
+
+        return modified;
+    }
+
+    @Benchmark(iteration = 10, priority = 70)
+    public Vertex findNodeWithNodeId10000() {
+        Vertex person = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.getVertices("Person.nodeId", 10000);
+            if (iterable.iterator().hasNext()) {
+                person = iterable.iterator().next();
+            }
+        } finally {
+            graph.shutdown();
+        }
+
+        return person;
+    }
+
+    @Benchmark(iteration = 10, priority = 60)
+    public int updateNodeWithNodeId10000() {
+        int modified;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            modified = graph.command(new OCommandSQL("UPDATE Person SET firstName = 'John', lastName = 'Doe' WHERE nodeId = 10000")).execute();
+        } finally {
+            graph.shutdown();
+        }
+
+        return modified;
+    }
+
+    @Benchmark(iteration = 1, priority = 50)
+    public int deleteNodeWithNodeId10000() {
+        int modified;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            modified = graph.command(new OCommandSQL("DELETE VERTEX Person WHERE nodeId = 10000")).execute();
+        } finally {
+            graph.shutdown();
+        }
+
+        return modified;
+
+    }
+
+    @Benchmark(iteration = 1, priority = 90)
+    public Vertex createNewNodeWithNodeId20000() {
+        Vertex person = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            person = graph.addVertex("class:Person");
+            person.setProperty("nodeId", 20000);
+
+            graph.commit();
+        } finally {
+            graph.shutdown();
+        }
+
+        return person;
+    }
+
+    @Benchmark(iteration = 1, priority = 80)
+    public boolean createNewRelationshipBetweenLeastConnectedNodeAndNodeWithNodeId20000() {
+        boolean modified = false;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Edge> resultOne = graph.command(new OCommandSQL("CREATE EDGE Friend FROM (SELECT FROM Person WHERE nodeId = 891) TO (SELECT FROM Person WHERE nodeId = 20000)")).execute();
+            Iterable<Edge> resultTwo = graph.command(new OCommandSQL("CREATE EDGE Friend FROM (SELECT FROM Person WHERE nodeId = 20000) TO (SELECT FROM Person WHERE nodeId = 891)")).execute();
+
+            modified = (resultOne.iterator().hasNext() && resultTwo.iterator().hasNext());
+        } finally {
+            graph.shutdown();
+        }
+
+        return modified;
+    }
+
+    @Benchmark(iteration = 10, priority = 70)
+    public Vertex findNodeWithNodeId20000() {
+        Vertex person = null;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            Iterable<Vertex> iterable = graph.getVertices("Person.nodeId", 20000);
+            if (iterable.iterator().hasNext()) {
+                person = iterable.iterator().next();
+            }
+        } finally {
+            graph.shutdown();
+        }
+
+        return person;
+    }
+
+    @Benchmark(iteration = 10, priority = 60)
+    public int updateNodeWithNodeId20000() {
+        int modified;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            modified = graph.command(new OCommandSQL("UPDATE Person SET firstName = 'John', lastName = 'Doe' WHERE nodeId = 20000")).execute();
+        } finally {
+            graph.shutdown();
+        }
+
+        return modified;
+    }
+
+    @Benchmark(iteration = 1, priority = 50)
+    public int deleteNodeWithNodeId20000() {
+        int modified;
+
+        OrientGraph graph = factory.getTx();
+        try {
+            modified = graph.command(new OCommandSQL("DELETE VERTEX Person WHERE nodeId = 20000")).execute();
+        } finally {
+            graph.shutdown();
+        }
+
+        return modified;
     }
 
     @TearDown
